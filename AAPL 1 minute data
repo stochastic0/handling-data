@@ -1,0 +1,61 @@
+import pandas as pd
+from time import sleep
+
+
+#---------------------------------------------1년 분봉 데이터----------------------------------------------------------------
+
+symbol = 'AAPL'
+interval = '1min'
+slice = 'year1month1'
+api_key = 'PVCEOI7H1YWUVCLI'
+adjusted = '&adjusted=true&'
+csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol='+symbol+'&interval='+interval+'&slice='+slice+adjusted+'&apikey='+api_key
+data = pd.read_csv(csv_url)
+print(data.head)
+
+
+for i in range(2,12):
+    symbol = 'AAPL'
+    interval = '1min'
+    slice = 'year1month'+str(i)
+    adjusted = '&adjusted=true&'
+    csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol=' + symbol + '&interval=' + interval + '&slice=' + slice + adjusted + '&apikey=' + api_key
+    data_ = pd.read_csv(csv_url)
+    data = pd.concat([data,data_])
+    sleep(61)
+
+slice = 'year1month12'
+csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol='+symbol+'&interval='+interval+'&slice='+slice+adjusted+'&apikey='+api_key
+data_12month = pd.read_csv(csv_url)
+
+data = pd.concat([data, data_12month])
+
+#data.to_csv("C:/Users/나/Downloads/1minute_data1.csv", index=False)
+
+#---------------------------------------------2년 분봉 데이터----------------------------------------------------------------
+
+symbol = 'AAPL'
+interval = '1min'
+slice = 'year2month1'
+api_key = 'PVCEOI7H1YWUVCLI'
+adjusted = '&adjusted=true&'
+csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol='+symbol+'&interval='+interval+'&slice='+slice+adjusted+'&apikey='+api_key
+data2 = pd.read_csv(csv_url)
+
+for i in range(2,12):
+    symbol = 'AAPL'
+    interval = '1min'
+    slice = 'year2month'+str(i)
+    adjusted = '&adjusted=true&'
+    csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol=' + symbol + '&interval=' + interval + '&slice=' + slice + adjusted + '&apikey=' + api_key
+    data2_ = pd.read_csv(csv_url)
+    data2 = pd.concat([data2,data2_])
+    sleep(61)
+
+slice = 'year2month12'
+csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol='+symbol+'&interval='+interval+'&slice='+slice+adjusted+'&apikey='+api_key
+data2_12month = pd.read_csv(csv_url)
+
+data2 = pd.concat([data2, data2_12month])
+
+#data2.to_csv("C:/Users/나/Downloads/1minute_data2.csv", index=False)
