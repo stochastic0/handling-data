@@ -1,0 +1,19 @@
+import requests
+from bs4 import BeautifulSoup as bs
+
+def get_sp500_tickers():
+    resp = requests.get('http://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
+    soup = bs(resp.text, 'lxml')
+    table = soup.find('table', {'class': 'wikitable sortable'})
+    tickers = []
+    for row in table.findAll('tr')[1:]:
+        ticker = row.findAll('td')[0].text
+        tickers.append(ticker)
+
+    return tickers
+
+
+sp500tickers = get_sp500_tickers()
+
+for i in range(0,504):
+    sp500tickers[i] = sp500tickers[i][:-1]
