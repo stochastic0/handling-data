@@ -52,7 +52,7 @@ time_frame = time_frame.drop(index=0, axis=0)
 symbol = 'AAPL'
 interval = '1min'
 slice = 'year1month1'
-api_key = 'S24FZTQED8GEYV8X'
+api_key = '' # require alpha vantage API key
 adjusted = '&adjusted=true&'
 csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol='+symbol+'&interval='+interval+'&slice='+slice+adjusted+'&apikey='+api_key
 data = pd.read_csv(csv_url)
@@ -88,7 +88,6 @@ for ticker in sp500tickers:
     symbol = ticker
     interval = '1min'
     slice = 'year1month1'
-    api_key = 'S24FZTQED8GEYV8X'
     adjusted = '&adjusted=true&'
     csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol=' + symbol + '&interval=' + interval + '&slice=' + slice + adjusted + '&apikey=' + api_key
     data1 = pd.read_csv(csv_url)
