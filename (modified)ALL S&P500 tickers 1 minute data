@@ -1,0 +1,116 @@
+import requests
+from bs4 import BeautifulSoup as bs
+import pandas as pd
+from time import sleep
+
+def get_sp500_tickers():
+    resp = requests.get('http://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
+    soup = bs(resp.text, 'lxml')
+    table = soup.find('table', {'class': 'wikitable sortable'})
+    tickers = []
+    for row in table.findAll('tr')[1:]:
+        ticker = row.findAll('td')[0].text
+        tickers.append(ticker)
+
+    return tickers
+
+sp500tickers = get_sp500_tickers()
+
+for i in range(0,504):
+    sp500tickers[i] = sp500tickers[i][:-1]
+
+sp500tickers.remove("AAPL")
+#-----------------------------------------------------------------------------------------------------------------------
+time_frame = pd.DataFrame([['']],
+                   index=[''],
+                   columns=['time'])
+time_frame['time'] = '2021-11-05 20:00:00'
+
+time_frame1 = pd.DataFrame([['']],
+                   index=[''],
+                   columns=['time'])
+list1 = ['2020','2021']
+for i in list1:
+    for j in range(1,13):
+        for k in range(1,32):
+            for x in range(4,21):
+                for y in range(0,60):
+                    time = i + '-' + str(j).zfill(2) + '-' + str(k).zfill(2) + ' ' + str(x).zfill(2) + ':' + str(
+                        y).zfill(2) + ':' + '00'
+                    time_frame1['time'] = time
+                    time_frame = time_frame.append(time_frame1)
+
+time_frame.reset_index(inplace=True)
+time_frame = time_frame.drop(columns=['index'], axis=1)
+time_frame = time_frame[::-1]
+time_frame = time_frame.drop(index=0, axis=0)
+
+
+
+#--------------------------------------------------1년치-----------------------------------------------------------------
+
+symbol = 'AAPL'
+interval = '1min'
+slice = 'year1month1'
+api_key = 'S24FZTQED8GEYV8X'
+adjusted = '&adjusted=true&'
+csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol='+symbol+'&interval='+interval+'&slice='+slice+adjusted+'&apikey='+api_key
+data = pd.read_csv(csv_url)
+data.rename(columns = {'close':'AAPL close'}, inplace = True)
+data = data.iloc[:,[0,4]]
+
+for i in range(2,12):
+    symbol = 'AAPL'
+    interval = '1min'
+    slice = 'year1month'+str(i)
+    adjusted = '&adjusted=true&'
+    csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol=' + symbol + '&interval=' + interval + '&slice=' + slice + adjusted + '&apikey=' + api_key
+    data_ = pd.read_csv(csv_url)
+    data_.rename(columns={'close': 'AAPL close'}, inplace=True)
+    data_ = data_.iloc[:, [0, 4]]
+    data = pd.concat([data,data_])
+
+slice = 'year1month12'
+csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol='+symbol+'&interval='+interval+'&slice='+slice+adjusted+'&apikey='+api_key
+data_12month = pd.read_csv(csv_url)
+data_12month.rename(columns={'close': 'AAPL close'}, inplace=True)
+data_12month = data_12month.iloc[:, [0, 4]]
+
+data = pd.concat([data, data_12month])
+
+data = pd.merge(time_frame, data, how = 'outer')
+
+
+
+
+for ticker in sp500tickers:
+
+    symbol = ticker
+    interval = '1min'
+    slice = 'year1month1'
+    api_key = 'S24FZTQED8GEYV8X'
+    adjusted = '&adjusted=true&'
+    csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol=' + symbol + '&interval=' + interval + '&slice=' + slice + adjusted + '&apikey=' + api_key
+    data1 = pd.read_csv(csv_url)
+    data1.rename(columns={'close': ticker +' '+'close'}, inplace=True)
+    data1 = data1.iloc[:, [0, 4]]
+
+    for i in range(2,12):
+        symbol = ticker
+        interval = '1min'
+        slice = 'year1month' + str(i)
+        adjusted = '&adjusted=true&'
+        csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol=' + symbol + '&interval=' + interval + '&slice=' + slice + adjusted + '&apikey=' + api_key
+        data1_ = pd.read_csv(csv_url)
+        data1_.rename(columns={'close': ticker +' '+'close'}, inplace=True)
+        data1_ = data1_.iloc[:, [0, 4]]
+        data1 = pd.concat([data1, data1_])
+
+    slice = 'year1month12'
+    csv_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol=' + symbol + '&interval=' + interval + '&slice=' + slice + adjusted + '&apikey=' + api_key
+    data_12month1 = pd.read_csv(csv_url)
+    data_12month1.rename(columns={'close': ticker +' '+'close'}, inplace=True)
+    data_12month1 = data_12month1.iloc[:, [0, 4]]
+
+    data1 = pd.concat([data1, data_12month1])
+    data = pd.merge(data,data1, how='outer')
